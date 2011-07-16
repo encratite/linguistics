@@ -22,6 +22,9 @@ class TranscriptionHandler < SiteContainer
 
   def renderTranscription(lines)
     writer = WWWLib::HTMLWriter.new
+    writer.p do
+      'Output:'
+    end
     writer.ul(class: 'output') do
       lines.each do |line|
         writer.li { line.join }

@@ -2,14 +2,13 @@ require 'nil/string'
 
 require 'www-library/RequestHandler'
 
-require 'application/SiteContainer'
+require 'application/Arabic'
 require 'application/error'
+require 'application/SiteContainer'
 
 require 'visual/TranscriptionHandler'
 
 class TranscriptionHandler < SiteContainer
-  Arabic = 'Arabic'
-
   Language = 'language'
   LanguageText = 'text'
 
@@ -19,7 +18,7 @@ class TranscriptionHandler < SiteContainer
     @submitTextHandler = WWWLib::RequestHandler.handler('submitText', method(:submitText))
     addHandler(@submitTextHandler)
     @languages = [
-      [Arabic, method(:transcribeArabic)],
+      ['Arabic', Arabic],
     ]
   end
 
@@ -34,21 +33,18 @@ class TranscriptionHandler < SiteContainer
     if language == nil || languageText == nil
       argumentError
     end
-    @languages.each do |description, handler|
+    @languages.each do |description, languageClass|
       if language == description
         inputLines = languageText.split("\n")
         inputLines.map! do |line|
           line.split
         end
-        outputLines = handler.call(inputLines)
+        outputLines = languageClass.new.transcribe(inputLines)
         content = renderTranscription(outputLines)
-        title = 'Transcription result'
+        title = "#{description} transcription result"
         return @generator.get(content, request, title)
       end
     end
     argumentError
-  end
-
-  def transcribeArabic(words)
   end
 end
