@@ -2,14 +2,12 @@ require 'www-library/RequestManager'
 require 'www-library/RequestHandler'
 
 require 'application/LinguisticsSiteGenerator'
-require 'shared/database'
-
-class LoLSite
+class LinguisticsSite
   attr_reader :mainHandler, :generator, :requestManager
 
   def initialize
     @requestManager = WWWLib::RequestManager.new
-    @mainHandler = WWWLib::RequestHandler.new('Linguistics')
+    @mainHandler = WWWLib::RequestHandler.new('linguistics')
     @requestManager.addHandler(@mainHandler)
     @generator = LinguisticsSiteGenerator.new(self, @requestManager)
     base = 'linguistics'

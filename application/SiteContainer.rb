@@ -5,9 +5,7 @@ class SiteContainer
 
   def initialize(site)
     @site = site
-    @database = site.database
     @generator = site.generator
-    @configuration = site.configuration
     installHandlers
   end
 

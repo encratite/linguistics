@@ -49,3 +49,35 @@ td
     padding: 0 0.5em 0 0.5em;
     border: 1px solid black;
 }
+
+li
+{
+    list-style-type: none;
+}
+
+textarea
+{
+    width: 20em;
+    height: 5em;
+}
+
+select
+{
+    width: 10em;
+}
+
+p
+{
+    margin-bottom: 1em;
+}
+
+div.container
+{
+    margin: 2em 0 0 2em;
+}
+
+img#ipa
+{
+    width: 20em;
+    margin-bottom: 2em;
+}

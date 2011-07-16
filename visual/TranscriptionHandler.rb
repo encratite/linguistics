@@ -5,21 +5,28 @@ require 'application/SiteContainer'
 class TranscriptionHandler < SiteContainer
   def renderTranscriptionForm
     writer = WWWLib::HTMLWriter.new
-    writer.form(action: @submitText.getPath) do
-      writer.p do
-        'Enter the source language material which you wish to transcribe to IPA into the following text box:'
-      end
+    writer.form(@submitTextHandler.getPath) do
       writer.p do
         options = @languages.map do |description, handler|
           WWWLib::SelectOption.new(description, description)
         end
-        writer.select('Choose a language', options)
+        writer.select(Language, options)
       end
       writer.p do
-        writer.textarea(cols: '50', rows: '20') {}
+        writer.textArea('Text', LanguageText) {}
       end
       writer.submit
     end
-    return writer.outupt
+    return writer.output
+  end
+
+  def renderTranscription(lines)
+    writer = WWWLib::HTMLWriter.new
+    writer.ul(class: 'output') do
+      lines.each do |line|
+        writer.li { line.join }
+      end
+    end
+    return writer.output
   end
 end
