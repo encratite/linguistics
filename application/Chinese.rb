@@ -20,6 +20,7 @@ class Chinese < Language
     'j' => 'ts\\',
     'q' => 'ts\\_h',
     'x' => 's\\',
+    'r' => 'z`', #not sure
     'z' => 'ts',
     'c' => 'ts_h',
     's' => 's',
@@ -69,6 +70,18 @@ class Chinese < Language
     'iong' => 'iUN',
   }
 
+  Fixed = {
+    'er' => 'Ar\\`',
+    'yu' => 'jy',
+    'zi' => 'ts1',
+    'ci' => 'ts_1',
+    'si' => 's1',
+    'zhi' => 'ts`1',
+    'chi' => 'ts`_h1',
+    'shi' => 's`1',
+    'ri' => '1',
+  }
+
   Accents = [
     'āáǎàa',
     'ēéěèe',
@@ -104,8 +117,8 @@ class Chinese < Language
           break
         end
       end
-      if false
-        raise LanguageError.new("Unable to process the final #{final.inspect}")
+      if !hit
+        output += letter
       end
     end
     return output, tone
@@ -113,6 +126,10 @@ class Chinese < Language
 
   def transcribeWord(word)
     word = word.downcase
+    fixed = Fixed[word]
+    if fixed != nil
+      return fixed
+    end
     Initials.each do |initial, initialXSAMPA|
       if word[0..initial.size - 1] == initial
         rest = word[initial.size..-1]
