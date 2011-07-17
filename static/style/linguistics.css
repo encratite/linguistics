@@ -71,9 +71,14 @@ p
     margin-bottom: 1em;
 }
 
+p.outputDescription
+{
+    font-weight: bold;
+}
+
 ul.output
 {
-    margin-left: 2em;
+    margin: 0 0 2em 2em;
 }
 
 div.container

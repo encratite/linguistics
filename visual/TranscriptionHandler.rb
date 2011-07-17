@@ -1,6 +1,7 @@
 require 'www-library/HTMLWriter'
 
 require 'application/SiteContainer'
+require 'application/XSAMPA'
 
 class TranscriptionHandler < SiteContainer
   def renderTranscriptionForm
@@ -22,7 +23,18 @@ class TranscriptionHandler < SiteContainer
 
   def renderTranscription(lines)
     writer = WWWLib::HTMLWriter.new
-    writer.p do
+    writer.p(class: 'outputDescription') do
+      'IPA output:'
+    end
+    writer.ul(class: 'output') do
+      lines.each do |line|
+        line = line.map do |word|
+          XSAMPA.toIPA(word)
+        end
+        writer.li { line.join(' ') }
+      end
+    end
+    writer.p(class: 'outputDescription') do
       'X-SAMPA output:'
     end
     writer.ul(class: 'output') do
