@@ -23,25 +23,22 @@ class TranscriptionHandler < SiteContainer
 
   def renderTranscription(lines)
     writer = WWWLib::HTMLWriter.new
-    writer.p(class: 'outputDescription') do
-      'IPA output:'
-    end
-    writer.ul(class: 'output') do
-      lines.each do |line|
-        line = line.map do |word|
-          XSAMPA.toIPA(word)
+    writeOutput = lambda do |description, mapping|
+      writer.p(class: 'outputDescription') do
+        "#{description}:"
+      end
+      writer.ul(class: 'output') do
+        lines.each do |line|
+          line = line.map do |word|
+            mapping.call(word)
+          end
+          writer.li { line.join(' ') }
         end
-        writer.li { line.join(' ') }
       end
     end
-    writer.p(class: 'outputDescription') do
-      'X-SAMPA output:'
-    end
-    writer.ul(class: 'output') do
-      lines.each do |line|
-        writer.li { line.join(' ') }
-      end
-    end
+
+    writeOutput.call('IPA output', XSAMPA.method(:toIPA))
+    writeOutput.call('X-SAMPA output', lambda { |x| x })
     return writer.output
   end
 end
