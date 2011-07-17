@@ -43,16 +43,16 @@ class Arabic < Language
   Nuun = "\u0646"
   Haa = "\u0647"
   Waaw = "\u0648"
-  AlifMaqShuurah= "\u0649"
+  AlifMaqShuurah = "\u0649"
   Yaa = "\u064A"
   Fathatan = "\u064B"
   Dammatan = "\u064C"
   Kasratan = "\u064D"
   Fathah = "\u064E"
-  Damma = "\u064F"
+  Dammah = "\u064F"
 
-  Kasra = "\u0650"
-  Shadda = "\u0651"
+  Kasrah = "\u0650"
+  Shaddah = "\u0651"
   Sukun = "\u0652"
   MaddahAbove = "\u0653"
   HamzaAbove = "\u0654"
@@ -81,38 +81,122 @@ class Arabic < Language
     WawHamza => '?w',
     AlifHamzaBelow => '?i',
     YaHamza => '?j',
-    Alif => '',
-    
+    Alif => '', #uncertain
+    Baa => 'b',
+    Marbuta => 'a', #or at?
+    Taa => 't',
+    Thaa => 'T',
+    Giim => 'dZ', #dZ ~ Z ~ g
+    Hhaa => 'X\\',
+    Khaa => 'x',
+    Daal => 'd',
+
+    Dhaal => 'D',
+    Raa => 'r',
+    Zayn => 'z',
+    Siin => 's',
+    Shiin => 'S',
+    Shaad => lambda { pharyngealise('s') },
+    Dhaad => lambda { pharyngealise('d') },
+    Thaa => lambda { pharyngealise('t') },
+    Zaa => lambda { pharyngealise('z') }, #D_?\ ~ z_?\
+    Ayn => '?\\',
+    Ghayn => 'G',
+
+    Faa => 'f',
+    Qaaf => 'q',
+    Kaaf => 'k',
+    Laam => 'l',
+    Miim => 'm',
+    Nuun => 'n',
+    Haa => 'h',
+    Waaw => 'w', #w, u:, aw, uncertain
+    Yaa => 'j', #j, i: aj, uncertain
 
     Fathah => method(:fathah),
+    Dammah => method(:dammah),
+    Kasrah => method(:kasrah),
+    Shaddah => method(:shaddah),
+    Sukuun => '', #I think...
   }
 
   def transcribeWord(word)
-    output = ''
+    @output = ''
+    @skip = false
+    @word = word
+    @lastLetter = nil
     word.size.times do |index|
+      @index = index
+      if @skip
+        @skip = false
+        next
+      end
       letter = word[index]
       translation = Map[letter]
       if translation == nil
         raise "Unknown Arabic Unicode symbol #{char.inspect} in word #{word.inspect}"
       end
-      if translation.class == Method
-        nextLetter = nil
-        nextIndex = index + 1
-        if nextIndex < word.size
-          nextLetter = word[index]
-        end
-        translation = translation.call(nextLetter)
+      if translation.class != String
+        translation = translation.call
       end
-      output += translation
+      @lastLetter = translation
+      @output += translation
     end
-    return output
+    return @output
+  end
+
+  def nextLetter
+    nextLetter = nil
+    nextIndex = @index + 1
+    if nextIndex < @word.size
+      nextLetter = @word[nextIndex]
+    end
+    return nextLetter
+  end
+
+  def lastLetter
+    if @lastLetter == nil
+      raise "Unable to retrieve the last letter of an empty word"
+    end
+    return @lastLetter
+  end
+
+  def skip
+    @skip = true
   end
 
   def isAlif(letter)
     return Alifs.include?(letter)
   end
 
-  def fathah(nextLetter)
-    return isAlif(nextLetter) ? 'a:' : 'a'
+  def fathah
+    if isAlif(nextLetter)
+      skip
+      return 'a:'
+    else
+      return 'a'
+    end
+  end
+
+  def dammah
+    if nextLetter == Waaw
+      skip
+      return 'u:'
+    else
+      return 'u'
+    end
+  end
+
+  def kasrah
+    if nextLetter == Yaa
+      skip
+      return 'i:'
+    else
+      return 'i'
+    end
+  end
+
+  def shaddah
+    return lastLetter
   end
 end
