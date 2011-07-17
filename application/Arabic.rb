@@ -81,7 +81,7 @@ class Arabic < Language
     WawHamza => '?w',
     AlifHamzaBelow => :alifHamzaBelow,
     YaHamza => '?j',
-    Alif => '', #uncertain
+    Alif => :alif, #uncertain
     Baa => 'b',
     Marbuta => 'a', #or at?
     Taa => 't',
@@ -149,7 +149,9 @@ class Arabic < Language
         @lastConsonant = translation
       end
       @wasVowel = @isVowel
-      @output << translation
+      if translation != nil
+        @output << translation
+      end
     end
     output = @output.join('')
     output = fixPharyngealisation(output)
@@ -202,6 +204,14 @@ class Arabic < Language
 
   def isAlif(letter)
     return Alifs.include?(letter)
+  end
+
+  def alif
+    @isVowel = true
+    if @output.empty?
+      return nil
+    end
+    return 'a:'
   end
 
   def fathah
