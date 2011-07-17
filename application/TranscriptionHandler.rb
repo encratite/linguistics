@@ -40,10 +40,14 @@ class TranscriptionHandler < SiteContainer
           line.split(' ')
         end
         translator = languageClass.new
-        outputLines = translator.transcribe(inputLines)
-        content = renderTranscription(translator, outputLines)
-        title = "#{description} transcription result"
-        return @generator.get(content, request, title)
+        begin
+          outputLines = translator.transcribe(inputLines)
+          content = renderTranscription(translator, outputLines)
+          title = "#{description} transcription result"
+          return @generator.get(content, request, title)
+        rescue LanguageError => exception
+          plainError(exception.message)
+        end
       end
     end
     argumentError

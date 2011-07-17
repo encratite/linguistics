@@ -135,8 +135,7 @@ class Arabic < Language
       letter = word[index]
       translation = Map[letter]
       if translation == nil
-        puts "Unknown Arabic Unicode symbol #{char.inspect} in word #{word.inspect}"
-        raise output
+        raise LanguageError.new("Unknown Arabic Unicode symbol #{letter.inspect} in word #{letter.inspect}")
       end
       @wordUnicodeAnalysis << letterToUnicodeName(letter)
       @isVowel = false
@@ -166,7 +165,7 @@ class Arabic < Language
         return symbol.to_s
       end
     end
-    raise "Unable to retrieve the Unicode name of #{letter.inspect}"
+    raise LanguageError.new("Unable to retrieve the Unicode name of #{letter.inspect}")
   end
 
   def fixPharyngealisation(input)
@@ -184,7 +183,7 @@ class Arabic < Language
 
   def lastConsonant
     if @lastConsonant == nil
-      raise "Unable to retrieve the last letter of an empty word"
+      raise LanguageError.new("Unable to retrieve the last letter of an empty word")
     end
     return @lastConsonant
   end

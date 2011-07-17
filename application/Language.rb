@@ -1,3 +1,6 @@
+class LanguageError < Exception
+end
+
 class Language
   attr_reader :unicodeNames
 
