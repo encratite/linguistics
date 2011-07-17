@@ -37,7 +37,7 @@ class TranscriptionHandler < SiteContainer
       if language == description
         inputLines = languageText.split("\n")
         inputLines.map! do |line|
-          line.split
+          line.split(' ')
         end
         outputLines = languageClass.new.transcribe(inputLines)
         content = renderTranscription(outputLines)

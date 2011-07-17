@@ -1,7 +1,7 @@
 *
 {
-    font-family: "Arial", sans-serif;
-    font-size: small;
+    font-family: "Times New Roman", serif;
+    font-size: large;
     margin: 0;
     padding: 0;
 }
@@ -69,6 +69,11 @@ select
 p
 {
     margin-bottom: 1em;
+}
+
+ul.output
+{
+    margin-left: 2em;
 }
 
 div.container

@@ -10,7 +10,7 @@ class Arabic < Language
   Baa = "\u0628"
   Marbuta = "\u0629"
   Taa = "\u062A"
-  Thaa = "\u062B"
+  Ttaa = "\u062B"
   Giim = "\u062C"
   Hhaa = "\u062D"
   Khaa = "\u062E"
@@ -53,7 +53,7 @@ class Arabic < Language
 
   Kasrah = "\u0650"
   Shaddah = "\u0651"
-  Sukun = "\u0652"
+  Sukuun = "\u0652"
   MaddahAbove = "\u0653"
   HamzaAbove = "\u0654"
   HamzaBelow = "\u0655"
@@ -85,7 +85,7 @@ class Arabic < Language
     Baa => 'b',
     Marbuta => 'a', #or at?
     Taa => 't',
-    Thaa => 'T',
+    Ttaa => 'T',
     Giim => 'dZ', #dZ ~ Z ~ g
     Hhaa => 'X\\',
     Khaa => 'x',
@@ -96,10 +96,10 @@ class Arabic < Language
     Zayn => 'z',
     Siin => 's',
     Shiin => 'S',
-    Shaad => lambda { pharyngealise('s') },
-    Dhaad => lambda { pharyngealise('d') },
-    Thaa => lambda { pharyngealise('t') },
-    Zaa => lambda { pharyngealise('z') }, #D_?\ ~ z_?\
+    Shaad => 's_?\\',
+    Dhaad => 'd_?\\',
+    Thaa => 't_?\\',
+    Zaa => 'z_?\\', #D_?\ ~ z_?\
     Ayn => '?\\',
     Ghayn => 'G',
 
@@ -113,10 +113,10 @@ class Arabic < Language
     Waaw => 'w', #w, u:, aw, uncertain
     Yaa => 'j', #j, i: aj, uncertain
 
-    Fathah => method(:fathah),
-    Dammah => method(:dammah),
-    Kasrah => method(:kasrah),
-    Shaddah => method(:shaddah),
+    Fathah => :fathah,
+    Dammah => :dammah,
+    Kasrah => :kasrah,
+    Shaddah => :shaddah,
     Sukuun => '', #I think...
   }
 
@@ -136,13 +136,21 @@ class Arabic < Language
       if translation == nil
         raise "Unknown Arabic Unicode symbol #{char.inspect} in word #{word.inspect}"
       end
-      if translation.class != String
+      case translation
+      when Proc
         translation = translation.call
+      when Symbol
+        translation = method(translation).call
       end
       @lastLetter = translation
       @output += translation
     end
+    fixPharyngealisation
     return @output
+  end
+
+  def fixPharyngealisation
+    @output = @output.gsub('_?\a', 'A')
   end
 
   def nextLetter
