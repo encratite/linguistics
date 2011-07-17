@@ -76,10 +76,10 @@ class Arabic < Language
   ]
 
   Map = {
-    AlifMadda => '?a:',
+    AlifMadda => :alifMadda,
     AlifHamzaAbove => '?',
     WawHamza => '?w',
-    AlifHamzaBelow => '?i',
+    AlifHamzaBelow => :alifHamzaBelow,
     YaHamza => '?j',
     Alif => '', #uncertain
     Baa => 'b',
@@ -121,10 +121,10 @@ class Arabic < Language
   }
 
   def transcribeWord(word)
-    @output = ''
+    @output = []
     @skip = false
     @word = word
-    @lastLetter = nil
+    @lastConsonant = nil
     @wordUnicodeAnalysis = []
     word.size.times do |index|
       @index = index
@@ -138,17 +138,22 @@ class Arabic < Language
         raise "Unknown Arabic Unicode symbol #{char.inspect} in word #{word.inspect}"
       end
       @wordUnicodeAnalysis << letterToUnicodeName(letter)
+      @isVowel = false
       case translation
       when Proc
         translation = translation.call
       when Symbol
         translation = method(translation).call
       end
-      @lastLetter = translation
-      @output += translation
+      if !@isVowel
+        @lastConsonant = translation
+      end
+      @wasVowel = @isVowel
+      @output << translation
     end
-    fixPharyngealisation
-    return @output
+    output = @output.join('')
+    output = fixPharyngealisation(output)
+    return output
   end
 
   def letterToUnicodeName(letter)
@@ -161,8 +166,8 @@ class Arabic < Language
     raise "Unable to retrieve the Unicode name of #{letter.inspect}"
   end
 
-  def fixPharyngealisation
-    @output = @output.gsub('_?\a', 'A')
+  def fixPharyngealisation(input)
+    return input.gsub('_?\a', 'A')
   end
 
   def nextLetter
@@ -174,15 +179,25 @@ class Arabic < Language
     return nextLetter
   end
 
-  def lastLetter
-    if @lastLetter == nil
+  def lastConsonant
+    if @lastConsonant == nil
       raise "Unable to retrieve the last letter of an empty word"
     end
-    return @lastLetter
+    return @lastConsonant
   end
 
   def skip
     @skip = true
+  end
+
+  def alifMadda
+    @isVowel = true
+    return '?a:'
+  end
+
+  def alifHamzaBelow
+    @isVowel = true
+    return '?i'
   end
 
   def isAlif(letter)
@@ -190,6 +205,7 @@ class Arabic < Language
   end
 
   def fathah
+    @isVowel = true
     if isAlif(nextLetter)
       skip
       return 'a:'
@@ -199,6 +215,7 @@ class Arabic < Language
   end
 
   def dammah
+    @isVowel = true
     if nextLetter == Waaw
       skip
       return 'u:'
@@ -208,6 +225,7 @@ class Arabic < Language
   end
 
   def kasrah
+    @isVowel = true
     if nextLetter == Yaa
       skip
       return 'i:'
@@ -217,6 +235,13 @@ class Arabic < Language
   end
 
   def shaddah
-    return lastLetter
+    if @wasVowel
+      output = @output[-1]
+      @output = @output[0..-2]
+      @output << lastConsonant
+    else
+      output = lastConsonant
+    end
+    return output
   end
 end
