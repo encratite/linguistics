@@ -21,24 +21,27 @@ class TranscriptionHandler < SiteContainer
     return writer.output
   end
 
-  def renderTranscription(lines)
+  def renderTranscription(translator, lines)
     writer = WWWLib::HTMLWriter.new
-    writeOutput = lambda do |description, mapping|
+    writeOutput = lambda do |description, currentLines, joinLetter, mapping = lambda { |x| x }|
       writer.p(class: 'outputDescription') do
         "#{description}:"
       end
       writer.ul(class: 'output') do
-        lines.each do |line|
+        currentLines.each do |line|
           line = line.map do |word|
             mapping.call(word)
           end
-          writer.li { line.join(' ') }
+          writer.li { line.join(joinLetter) }
         end
       end
     end
 
-    writeOutput.call('IPA output', XSAMPA.method(:toIPA))
-    writeOutput.call('X-SAMPA output', lambda { |x| x })
+    writeOutput.call('IPA output', lines, ' ', XSAMPA.method(:toIPA))
+    writeOutput.call('X-SAMPA output', lines, ' ')
+    if translator.unicodeNames != nil
+      writeOutput.call('Unicode analysis', translator.unicodeNames, '-')
+    end
     return writer.output
   end
 end

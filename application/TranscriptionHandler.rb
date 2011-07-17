@@ -39,8 +39,9 @@ class TranscriptionHandler < SiteContainer
         inputLines.map! do |line|
           line.split(' ')
         end
-        outputLines = languageClass.new.transcribe(inputLines)
-        content = renderTranscription(outputLines)
+        translator = languageClass.new
+        outputLines = translator.transcribe(inputLines)
+        content = renderTranscription(translator, outputLines)
         title = "#{description} transcription result"
         return @generator.get(content, request, title)
       end

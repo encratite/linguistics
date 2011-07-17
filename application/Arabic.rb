@@ -125,6 +125,7 @@ class Arabic < Language
     @skip = false
     @word = word
     @lastLetter = nil
+    @wordUnicodeAnalysis = []
     word.size.times do |index|
       @index = index
       if @skip
@@ -136,6 +137,7 @@ class Arabic < Language
       if translation == nil
         raise "Unknown Arabic Unicode symbol #{char.inspect} in word #{word.inspect}"
       end
+      @wordUnicodeAnalysis << letterToUnicodeName(letter)
       case translation
       when Proc
         translation = translation.call
@@ -147,6 +149,16 @@ class Arabic < Language
     end
     fixPharyngealisation
     return @output
+  end
+
+  def letterToUnicodeName(letter)
+    Arabic.constants.each do |symbol|
+      value = Arabic.const_get(symbol)
+      if value == letter
+        return symbol.to_s
+      end
+    end
+    raise "Unable to retrieve the Unicode name of #{letter.inspect}"
   end
 
   def fixPharyngealisation
