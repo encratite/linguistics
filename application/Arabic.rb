@@ -135,7 +135,8 @@ class Arabic < Language
       letter = word[index]
       translation = Map[letter]
       if translation == nil
-        raise "Unknown Arabic Unicode symbol #{char.inspect} in word #{word.inspect}"
+        puts "Unknown Arabic Unicode symbol #{char.inspect} in word #{word.inspect}"
+        raise output
       end
       @wordUnicodeAnalysis << letterToUnicodeName(letter)
       @isVowel = false
