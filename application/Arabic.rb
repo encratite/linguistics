@@ -120,6 +120,21 @@ class Arabic < Language
     Sukuun => '', #I think...
   }
 
+  AdvancingConsonants = [
+    'm',
+    'b',
+    'f',
+
+    'T',
+    'D',
+    'n',
+    't',
+    'd',
+    's',
+    'z',
+    'l',
+  ]
+
   def transcribeWord(word)
     @output = []
     @skip = false
@@ -154,7 +169,7 @@ class Arabic < Language
       end
     end
     output = @output.join('')
-    output = fixPharyngealisation(output)
+    output = fix(output)
     return output
   end
 
@@ -168,8 +183,14 @@ class Arabic < Language
     raise LanguageError.new("Unable to retrieve the Unicode name of #{letter.inspect}")
   end
 
-  def fixPharyngealisation(input)
-    return input.gsub('_?\a', 'A')
+  def fix(input)
+    output = input.gsub('_?\a', 'A')
+    AdvancingConsonants.each do |consonant|
+      output = output.gsub("#{consonant}a", "#{consonant}{")
+    end
+    output = output.gsub('d', 'd_d')
+    output = output.gsub('t', 't_d')
+    return output
   end
 
   def nextLetter
