@@ -92,10 +92,43 @@ class Chinese < Language
 
   Tones = [
     '_T',
-    '_H_T',
-    '_F_H', #this is wrong
-    '_F',
+    '_M_T',
+    '_L_B_H',
+    '_T_B',
   ]
+
+  def translateVowel(vowel)
+    Accents.each do |vowelString|
+      offset = vowelString.index(vowel)
+      if offset == nil
+        next
+      end
+      if offset == 4
+        return nil
+      end
+      withoutAccent = vowelString[-1]
+      return withoutAccent, Tones[offset]
+    end
+    return nil
+  end
+
+  def accentTranslation(string)
+    tone = nil
+    output = ''
+    string.each_char do |letter|
+      translationData = translateVowel(letter)
+      if translationData == nil
+        output += letter
+      else
+        if tone != nil
+          raise LanguageError.new("Encountered two tones in #{string.inspect}, first one was #{tone.inspect}")
+        end
+        withoutAccent, tone = translationData
+        output += withoutAccent
+      end
+    end
+    return output, tone
+  end
 
   #remove accents and determine tone
   def processFinal(final)
@@ -110,7 +143,7 @@ class Chinese < Language
           hit = true
           if index >= 0 && index <= 3
             if tone != nil
-              raise LanguageError.new("Encountered two tones in the final #{final.inspect}")
+              raise LanguageError.new("Encountered two tones in #{final.inspect}")
             end
             tone = Tones[index]
           end
@@ -126,9 +159,10 @@ class Chinese < Language
 
   def transcribeWord(word)
     word = word.downcase
-    fixed = Fixed[word]
+    translatedWord, tone = accentTranslation(word)
+    fixed = Fixed[translatedWord]
     if fixed != nil
-      return fixed
+      return fixed + tone
     end
     Initials.each do |initial, initialXSAMPA|
       if word[0..initial.size - 1] == initial
@@ -137,7 +171,7 @@ class Chinese < Language
         finalXSAMPA = Finals[final]
         output = initialXSAMPA + finalXSAMPA
         if tone != nil
-          #output += tone
+          output += tone
         end
         return output
       end
