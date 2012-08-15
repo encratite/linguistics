@@ -75,6 +75,10 @@ class Arabic < Language
     Alif,
   ]
 
+  Hamza = "\u0621"
+
+  LeftToRightMark = "\u200E"
+
   Map = {
     AlifMadda => :alifMadda,
     AlifHamzaAbove => '?',
@@ -113,11 +117,15 @@ class Arabic < Language
     Waaw => 'w', #w, u:, aw, uncertain
     Yaa => 'j', #j, i: aj, uncertain
 
+    Hamza => '?',
+
     Fathah => :fathah,
     Dammah => :dammah,
     Kasrah => :kasrah,
     Shaddah => :shaddah,
     Sukuun => '', #I think...
+
+    LeftToRightMark => '',
   }
 
   AdvancingConsonants = [
@@ -148,9 +156,12 @@ class Arabic < Language
         next
       end
       letter = word[index]
+      hexString = '0x' + letter.bytes.to_a.map { |x| sprintf('%02X', x) }.join
+      #puts "Processing (#{hexString}):"
+      puts letter.inspect
       translation = Map[letter]
       if translation == nil
-        raise LanguageError.new("Unknown Arabic Unicode symbol #{letter.inspect} in word #{letter.inspect}")
+        raise LanguageError.new("Unknown Arabic Unicode symbol #{letter.inspect} (#{hexString}) in word #{letter.inspect}")
       end
       @wordUnicodeAnalysis << letterToUnicodeName(letter)
       @isVowel = false
