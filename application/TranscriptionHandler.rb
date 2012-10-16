@@ -4,6 +4,8 @@ require 'www-library/RequestHandler'
 
 require 'application/Arabic'
 require 'application/Chinese'
+require 'application/Tibetan'
+
 require 'application/error'
 require 'application/SiteContainer'
 
@@ -21,6 +23,7 @@ class TranscriptionHandler < SiteContainer
     @languages = [
       ['Arabic', Arabic],
       ['Pin Yin', Chinese],
+      ['Tibetan', Tibetan],
     ]
   end
 
