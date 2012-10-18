@@ -46,6 +46,11 @@ class Tibetan < Language
 
   KaSubscript = "\u0F90"
 
+  #Not sure
+  WaSubscript = "\u0FAD"
+
+  HaSubscript = "\u0FB7"
+
   #Vowels
 
   VowelAa = "\u0F71"
@@ -67,6 +72,7 @@ class Tibetan < Language
   VowelBreathy = "\u0F7F"
 
   Tseg = "\u0F0B"
+  TsegBhstar = "\u0F0C"
 
   TerminationMark1 = "\u0F0D"
   TerminationMark2 = "\u0F0E"
@@ -118,20 +124,24 @@ class Tibetan < Language
 
     #Subscript radicals
 
-    KaSubscript => ['k', :high],
+    KaSubscript => ['k', :high, :subscript],
+
+    WaSubscript => ['w', :low, :subscript],
+
+    HaSubscript => ['h', :low, :subscript],
 
     #Vowels
 
-    VowelAa => 'a:',
-    VowelI => 'i',
-    VowelIi => 'i:',
-    VowelU => 'u',
-    VowelUu => 'u:',
-    VowelE => 'e',
-    VowelAi => 'ai',
-    VowelO => 'o',
+    VowelAa => ['a:', :vowel],
+    VowelI => ['i', :vowel],
+    VowelIi => ['i:', :vowel],
+    VowelU => ['u', :vowel],
+    VowelUu => ['u:', :vowel],
+    VowelE => ['e', :vowel],
+    VowelAi => ['ai', :vowel],
+    VowelO => ['o', :vowel],
 
-    VowelAu => 'au',
+    VowelAu => ['au', :vowel],
     #Not sure about the retroflex ones
     VowelRetroflexR => 'r`',
     VowelRetroflexRr => 'r`:',
@@ -142,6 +152,7 @@ class Tibetan < Language
     VowelBreathy => '_t',
 
     Tseg => ' ',
+    TsegBhstar => ' ',
     TerminationMark1 => ' ',
     TerminationMark2 => ' ',
     TerminationMark3 => ' ',
@@ -151,6 +162,8 @@ class Tibetan < Language
     @output = []
     @word = word
     @wordUnicodeAnalysis = []
+    @tone = nil
+    @wasConsonant = false
     word.size.times do |index|
       @index = index
       letter = word[index]
@@ -159,20 +172,70 @@ class Tibetan < Language
         raise LanguageError.new("Unknown Tibetan Unicode symbol #{letter.inspect}")
       end
       @wordUnicodeAnalysis << letterToUnicodeName(letter)
+      puts translation.inspect
       case translation
       when Proc
         translation = translation.call
       when Symbol
         translation = method(translation).call
       when Array
+        marker = translation[1]
+        subscript = translation[2]
         translation = translation[0]
+        if marker == :vowel
+          if @tone != nil
+            translation += getTone
+          end
+          @wasConsonant = false
+          @tone = nil
+        elsif marker == :low || marker == :high
+          if subscript == nil
+            vowelCheck
+          end
+          @tone = marker
+          @wasConsonant = true
+        else
+          raise 'Invalid condition'
+        end
+      else
+        vowelCheck
+        @wasConsonant = false
       end
+      puts @wasConsonant.inspect
       if translation != nil
         @output << translation
       end
     end
-    output = @output.join('')
+    output = fixOutput(@output.join(''))
     return output
+  end
+
+  def fixOutput(input)
+    replacements = {
+      '_L~' => '~_L',
+      '_H~' => '~_H',
+    }
+    output = input
+    replacements.each do |target, replacement|
+      output = output.gsub(target, replacement)
+    end
+    return output
+  end
+
+  def vowelCheck
+    if @wasConsonant
+      @output << ('a' + getTone)
+    end
+  end
+
+  def getTone
+    if @tone == :high
+      return '_H'
+    elsif @tone == :low
+      return '_L'
+    else
+      return ''
+    end
   end
 
   def letterToUnicodeName(letter)
